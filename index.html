@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFLIXSERIES</title>
+    <title>DFLIXSERIES - Episode Index</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --red: #e50914; --bg: #050505; --card: #161616; }
@@ -13,63 +13,94 @@
         .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto 30px; }
         .ep-link { background: var(--card); border: 1px solid #222; padding: 20px 10px; border-radius: 12px; text-decoration: none; color: white; transition: 0.3s; display: block; }
         .ep-link:hover { background: var(--red); transform: translateY(-5px); border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4); }
-        .ep-link.active { border-color: var(--red); background: rgba(229, 9, 20, 0.2); }
+        .error-msg { background: #331111; color: #ff9999; padding: 20px; border-radius: 10px; margin-top: 50px; display: none; }
         .ep-text { font-size: 16px; font-weight: 700; display: block; }
         .ep-sub { display: block; font-size: 10px; opacity: 0.6; margin-top: 8px; text-transform: uppercase; color: #ff9999; }
     </style>
 </head>
 <body>
+
     <div class="logo">DFLIXSERIES</div>
     <div id="main"></div>
+    <div id="error" class="error-msg"></div>
 
     <script>
         const main = document.getElementById('main');
-        const urlParams = new URLSearchParams(window.location.search);
-        const ids = urlParams.get('ids');
+        const errorDiv = document.getElementById('error');
 
-        if (ids) {
-            const chunks = ids.split(/,(?=S\d+)/);
-            chunks.forEach(chunk => {
-                const sName = (chunk.match(/^(S\d+)/) || ["S1"])[0].replace('S', 'SEASON ');
+        // URL से डेटा निकालना (Safe Way)
+        const fullUrl = window.location.href;
+        
+        if (fullUrl.includes('ids=')) {
+            try {
+                // पूरे URL को डिकोड करें
+                const rawData = decodeURIComponent(fullUrl.split('ids=')[1]);
                 
-                const h = document.createElement('div');
-                h.className = 'season-title';
-                h.innerText = sName;
-                main.appendChild(h);
+                // सीज़न के आधार पर स्प्लिट करें (S1, S2, S3...)
+                const chunks = rawData.split(/,(?=S\d+)/);
 
-                const grid = document.createElement('div');
-                grid.className = 'ep-grid';
-                main.appendChild(grid);
+                if (chunks.length === 0) throw "No Season Data Found";
 
-                const epRegex = /\((\d+)\),\(([^)]+)\),\(([^)]+)\)/g;
-                let m;
-                while ((m = epRegex.exec(chunk)) !== null) {
-                    const epNo = m[1];
-                    const epTxt = m[2];
-                    const epKey = m[3].trim();
+                chunks.forEach(chunk => {
+                    // सीज़न का नाम (S1 -> SEASON 1)
+                    const sMatch = chunk.match(/^(S\d+)/);
+                    if (!sMatch) return;
 
-                    // --- EXACT INTENT LOGIC ---
-                    // 1. लिंक क्लीन करें और पैरामीटर जोड़ें
-                    let path = `www.dropbox.com/scl/fi/${epKey}`;
-                    path += path.includes('?') ? '&dl=0&raw=1' : '?dl=0&raw=1';
+                    const h = document.createElement('div');
+                    h.className = 'season-title';
+                    h.innerText = sMatch[0].replace('S', 'SEASON ');
+                    main.appendChild(h);
 
-                    // 2. Title (DFlix Streaming या Dynamic)
-                    const title = encodeURIComponent(`EP ${epNo} - ${epTxt}`);
+                    const grid = document.createElement('div');
+                    grid.className = 'ep-grid';
+                    main.appendChild(grid);
 
-                    // 3. Final Intent (Exactly as you asked)
-                    const intent = `intent://${path}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=${title};B.force_no_download=true;end`;
+                    // एपिसोड्स के लिए Regex: (No),(Text),(Link)
+                    const epRegex = /\((\d+)\),\(([^)]+)\),\(([^)]+)\)/g;
+                    let m;
+                    let foundAny = false;
 
-                    const btn = document.createElement('a');
-                    btn.href = intent;
-                    btn.className = "ep-link";
-                    btn.onclick = function() {
-                        document.querySelectorAll('.ep-link').forEach(el => el.classList.remove('active'));
-                        this.classList.add('active');
-                    };
-                    btn.innerHTML = `<span class="ep-text">EP ${epNo}</span><span class="ep-sub">${epTxt}</span>`;
-                    grid.appendChild(btn);
-                }
-            });
+                    while ((m = epRegex.exec(chunk)) !== null) {
+                        foundAny = true;
+                        const epNo = m[1];
+                        const epTxt = m[2];
+                        const epKey = m[3].trim();
+
+                        // 1. Dropbox Path तैयार करें (Exact Format)
+                        let path = `www.dropbox.com/scl/fi/${epKey}`;
+                        
+                        // 2. Parameters जोड़ें (&dl=0&raw=1)
+                        if (path.includes('?')) {
+                            path += "&dl=0&raw=1";
+                        } else {
+                            path += "?dl=0&raw=1";
+                        }
+
+                        // 3. Title एनकोड करें
+                        const title = encodeURIComponent(`EP ${epNo} - ${epTxt}`);
+
+                        // 4. Intent URL (Exactly as you asked)
+                        const intent = `intent://${path}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=${title};B.force_no_download=true;end`;
+
+                        const btn = document.createElement('a');
+                        btn.href = intent;
+                        btn.className = "ep-link";
+                        btn.innerHTML = `<span class="ep-text">EP ${epNo}</span><span class="ep-sub">${epTxt}</span>`;
+                        grid.appendChild(btn);
+                    }
+                    
+                    if (!foundAny) {
+                        grid.innerHTML = "<p style='opacity:0.5'>No episodes found in this season.</p>";
+                    }
+                });
+
+            } catch (e) {
+                errorDiv.style.display = "block";
+                errorDiv.innerText = "Error loading data: " + e;
+            }
+        } else {
+            errorDiv.style.display = "block";
+            errorDiv.innerText = "No 'ids' parameter found in the URL. Please generate a link from the Admin Panel.";
         }
     </script>
 </body>
