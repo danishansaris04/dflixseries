@@ -9,31 +9,14 @@
         :root { --red: #e50914; --bg: #050505; --card: #161616; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; }
-        
         .season-title {
-            max-width: 900px; margin: 20px auto 15px;
-            padding: 15px 20px; border-left: 5px solid var(--red);
-            font-size: 20px; font-weight: 700; background: #111; text-align: left;
-            text-transform: uppercase; border-radius: 0 8px 8px 0;
+            max-width: 900px; margin: 20px auto 15px; padding: 15px 20px; 
+            border-left: 5px solid var(--red); font-size: 20px; font-weight: 700; 
+            background: #111; text-align: left; text-transform: uppercase; border-radius: 0 8px 8px 0;
         }
-
-        .ep-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 15px; max-width: 900px; margin: 0 auto 30px;
-        }
-
-        .ep-link {
-            background: var(--card); border: 1px solid #222;
-            padding: 20px 10px; border-radius: 12px;
-            text-decoration: none; color: white;
-            transition: 0.3s; display: block;
-        }
-
-        .ep-link:hover {
-            background: var(--red); transform: translateY(-5px);
-            border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
-        }
-
+        .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto 30px; }
+        .ep-link { background: var(--card); border: 1px solid #222; padding: 20px 10px; border-radius: 12px; text-decoration: none; color: white; transition: 0.3s; display: block; }
+        .ep-link:hover { background: var(--red); transform: translateY(-5px); border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4); }
         .ep-text { font-size: 16px; font-weight: 700; display: block; }
         .ep-sub { display: block; font-size: 10px; opacity: 0.5; margin-top: 8px; text-transform: uppercase; }
     </style>
@@ -50,7 +33,6 @@
         const currentUrl = window.location.href;
 
         if (currentUrl.includes('ids=')) {
-            // Raw content nikaalein
             const idsContent = decodeURIComponent(currentUrl.split('ids=')[1]);
 
             // Season Header
@@ -63,21 +45,18 @@
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // NEW REGEX: Yeh do brackets ke pair dhoondhega (Num) aur (Link)
-            // Pattern: (number),(link)
-            const epRegex = /\((\d+)\),\(([\s\S]+?)\)/g;
+            // Updated Regex: Yeh link ke brackets ke andar ka saara data uthayega bina kisi character ko chhode
+            const epRegex = /\((\d+)\),\(([^)]+)\)/g;
             let match;
 
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
                 let epFullLink = match[2].trim();
 
-                // Dropbox raw streaming suffix add karein
-                let streamingUrl = epFullLink.includes('?') ? 
-                                   `${epFullLink}&raw=1` : 
-                                   `${epFullLink}?raw=1`;
+                // Streaming suffix logic
+                let streamingUrl = epFullLink.includes('?') ? `${epFullLink}&raw=1` : `${epFullLink}?raw=1`;
 
-                // Final Intent link (Package: Just Player)
+                // Intent URL building (Filename is now included in epFullLink)
                 const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingUrl}#Intent;scheme=https;type=video/*;package=com.brouken.player;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
