@@ -10,12 +10,8 @@
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; }
         
-        .season-title {
-            max-width: 900px; margin: 30px auto 15px;
-            padding: 15px 20px; border-left: 5px solid var(--red);
-            font-size: 20px; font-weight: 700; background: #111; text-align: left;
-            text-transform: uppercase; border-radius: 0 8px 8px 0;
-        }
+        /* Season title ko hide kar diya gaya hai */
+        .season-title { display: none; }
 
         .ep-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -47,56 +43,38 @@
 
     <script>
         const mainContainer = document.getElementById('mainContainer');
-        const urlParams = new URLSearchParams(window.location.search);
-        // Poora URL string uthao bina kisi cleaning ke
         const fullQuery = window.location.search;
 
         if (fullQuery.includes('ids=')) {
             const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
 
-            // 1. Season Sections nikaalo
-            const sections = idsContent.split(/S(\d+),/gi);
-            
-            // Agar pehla part khali hai toh hata do
-            if (sections[0] === "" || !sections[0].includes('(')) sections.shift();
+            // Ek hi common grid banate hain saare episodes ke liye
+            const grid = document.createElement('div');
+            grid.className = 'ep-grid';
+            mainContainer.appendChild(grid);
 
-            for (let i = 0; i < sections.length; i += 2) {
-                const sNum = sections[i] || "1";
-                const sData = sections[i+1] || sections[i];
+            // Regex jo sirf (Episode Number) aur uske baad ka link dhoondhega
+            // Yeh "S1" jaise tags ko ignore kar dega
+            const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
+            let match;
 
-                // Season Title
-                const h = document.createElement('div');
-                h.className = 'season-title';
-                h.innerText = "SEASON " + sNum;
-                mainContainer.appendChild(h);
+            while ((match = epRegex.exec(idsContent)) !== null) {
+                const epNum = match[1];
+                let epLink = match[2].trim();
 
-                const grid = document.createElement('div');
-                grid.className = 'ep-grid';
-                mainContainer.appendChild(grid);
+                // Link ke end mein agar extra characters ya commas hain toh clean karein
+                const cleanLink = epLink.replace(/,$/, '').split(',S')[0];
 
-                // 2. Episode Extractor (Sabse important part)
-                // Yeh regex dhoondhega: (Episode Number) aur uske baad ka link
-                const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$))/g;
-                let match;
+                const intentUrl = `intent://www.dropbox.com/scl/fi/${cleanLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
-                while ((match = epRegex.exec(sData)) !== null) {
-                    const epNum = match[1];
-                    const epLink = match[2].trim();
-
-                    // Agar link ke end mein comma hai toh remove karo
-                    const cleanLink = epLink.replace(/,$/, '');
-
-                    const intentUrl = `intent://www.dropbox.com/scl/fi/${cleanLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
-
-                    const btn = document.createElement('a');
-                    btn.href = intentUrl;
-                    btn.className = "ep-link";
-                    btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">WATCH NOW</span>`;
-                    grid.appendChild(btn);
-                }
+                const btn = document.createElement('a');
+                btn.href = intentUrl;
+                btn.className = "ep-link";
+                btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">WATCH NOW</span>`;
+                grid.appendChild(btn);
             }
         } else {
-            mainContainer.innerHTML = "Link is incorrect or IDs missing.";
+            mainContainer.innerHTML = "No IDs found.";
         }
     </script>
 </body>
