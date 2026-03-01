@@ -11,7 +11,7 @@
         .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; margin-top: 20px; }
         
         #access-denied { display: none; margin-top: 100px; }
-        .error-btn { background: var(--red); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; font-weight: bold; }
+        .error-btn { background: var(--red); color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; display: inline-block; margin-top: 20px; font-weight: bold; }
 
         .season-title {
             max-width: 900px; margin: 30px auto 15px;
@@ -21,7 +21,8 @@
         }
 
         .ep-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 15px; max-width: 900px; margin: 0 auto 30px;
         }
 
@@ -76,37 +77,40 @@
                 let currentGrid = null;
                 let tempLabel = "";
 
+                // Function to create and attach a new grid
+                const createNewGrid = () => {
+                    const g = document.createElement('div');
+                    g.className = 'ep-grid';
+                    mainContainer.appendChild(g);
+                    return g;
+                };
+
                 items.forEach((item) => {
                     let val = item.trim();
                     if (!val) return;
 
-                    // Season (S1, S2...)
+                    // 1. Detect Season (e.g., S1, S2)
                     if (/^S\d+$/i.test(val)) {
                         const h = document.createElement('div');
                         h.className = 'season-title';
                         h.innerText = "SEASON " + val.toUpperCase().replace('S', '');
                         mainContainer.appendChild(h);
-
-                        const g = document.createElement('div');
-                        g.className = 'ep-grid';
-                        mainContainer.appendChild(g);
-                        currentGrid = g;
+                        
+                        currentGrid = createNewGrid();
                     } 
-                    // Label (1), (1-5)...
+                    // 2. Detect Episode Label (e.g., (1))
                     else if (val.startsWith('(') && val.endsWith(')')) {
                         tempLabel = val.replace('(', '').replace(')', '');
                     } 
-                    // Dropbox ID -> Intent Link
+                    // 3. Detect Dropbox ID (Everything else)
                     else {
+                        // If no grid exists yet (e.g., URL starts with IDs instead of S1)
                         if (!currentGrid) {
-                            currentGrid = document.createElement('div');
-                            currentGrid.className = 'ep-grid';
-                            mainContainer.appendChild(currentGrid);
+                            currentGrid = createNewGrid();
                         }
 
                         let displayTitle = tempLabel ? "EP " + tempLabel : "WATCH NOW";
                         
-                        // Intent Format with White Screen package
                         const intentUrl = `intent://www.dropbox.com/scl/fi/${val}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                         const btn = document.createElement('a');
@@ -115,9 +119,13 @@
                         btn.innerHTML = `<span class="ep-text">${displayTitle}</span><span class="ep-sub">PLAY IN APP</span>`;
                         
                         currentGrid.appendChild(btn);
+                        
+                        // Clear the label so the next episode doesn't repeat the same number
                         tempLabel = ""; 
                     }
                 });
+            } else {
+                mainContainer.innerHTML = "<p style='opacity:0.5'>No episodes found in URL.</p>";
             }
         }
     </script>
