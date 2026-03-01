@@ -3,69 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFlix Series - Multi-Info</title>
+    <title>DFlix Series - Episode Index</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --red: #e50914; --bg: #050505; --card: #161616; }
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; letter-spacing: 2px; }
-        .season-title { max-width: 900px; margin: 40px auto 15px; padding: 15px 20px; border-left: 5px solid var(--red); font-size: 20px; font-weight: 700; background: #111; text-align: left; text-transform: uppercase; border-radius: 0 8px 8px 0; }
-        .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto 30px; }
+        .season-title {
+            max-width: 900px; margin: 40px auto 15px; padding: 15px 20px; 
+            border-left: 5px solid var(--red); font-size: 20px; font-weight: 700; 
+            background: #111; text-align: left; text-transform: uppercase; border-radius: 0 8px 8px 0;
+        }
+        .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto 30px; }
         .ep-link { background: var(--card); border: 1px solid #222; padding: 20px 10px; border-radius: 12px; text-decoration: none; color: white; transition: 0.3s; display: block; }
         .ep-link:hover { background: var(--red); transform: translateY(-5px); border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4); }
         .ep-link.active { border-color: var(--red); background: rgba(229, 9, 20, 0.2); }
         .ep-text { font-size: 16px; font-weight: 700; display: block; }
-        .ep-sub { display: block; font-size: 11px; opacity: 0.7; margin-top: 8px; text-transform: uppercase; color: #ff9999; }
+        .ep-sub { display: block; font-size: 10px; opacity: 0.6; margin-top: 8px; text-transform: uppercase; color: #ff9999; }
     </style>
 </head>
 <body>
+
     <div class="logo">DFLIXSERIES</div>
     <div id="mainContainer"></div>
 
     <script>
-        const container = document.getElementById('mainContainer');
-        const params = new URLSearchParams(window.location.search);
-        const ids = params.get('ids');
+        const mainContainer = document.getElementById('mainContainer');
+        const urlParams = new URLSearchParams(window.location.search);
+        const idsContent = urlParams.get('ids');
 
-        if (ids) {
-            const seasons = ids.split(/,(?=S\d+)/);
-            seasons.forEach(chunk => {
+        if (idsContent) {
+            // सीज़न के आधार पर स्प्लिट करें
+            const seasonChunks = idsContent.split(/,(?=S\d+)/);
+
+            seasonChunks.forEach(chunk => {
                 const sNameMatch = chunk.match(/^(S\d+)/);
                 if (!sNameMatch) return;
 
-                // Season Title
+                const sName = sNameMatch[0].replace('S', 'SEASON ');
+
+                // सीज़न हेडर
                 const h = document.createElement('div');
                 h.className = 'season-title';
-                h.innerText = sNameMatch[0].replace('S', 'SEASON ');
-                container.appendChild(h);
+                h.innerText = sName;
+                mainContainer.appendChild(h);
 
-                // Grid
+                // ग्रिड
                 const grid = document.createElement('div');
                 grid.className = 'ep-grid';
-                container.appendChild(grid);
+                mainContainer.appendChild(grid);
 
-                // Regex for 3 parts: (No),(Text),(Link)
+                // (No),(Text),(Link) फॉर्मेट के लिए Regex
                 const epRegex = /\((\d+)\),\(([^)]+)\),\(([^)]+)\)/g;
-                let m;
-                while ((m = epRegex.exec(chunk)) !== null) {
-                    const epNo = m[1];
-                    const epTxt = m[2];
-                    const epKey = m[3];
-                    
-                    const streamUrl = `https://www.dropbox.com/scl/fi/${epKey}?raw=1`;
-                    const intent = `intent://${streamUrl.replace(/^https?:\/\//, '')}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=${encodeURIComponent("EP "+epNo+" - "+epTxt)};B.force_no_download=true;end`;
+                let match;
 
-                    const a = document.createElement('a');
-                    a.href = intent;
-                    a.className = "ep-link";
-                    a.onclick = function() {
-                        document.querySelectorAll('.ep-link').forEach(e => e.classList.remove('active'));
+                while ((match = epRegex.exec(chunk)) !== null) {
+                    const epNo = match[1];
+                    const epTxt = match[2];
+                    const epKey = match[3].trim();
+
+                    // --- Intent URL Logic ---
+                    // 1. शुद्ध Dropbox Direct Link बनाएँ
+                    let dropboxBase = `www.dropbox.com/scl/fi/${epKey}`;
+                    let finalDirectLink = dropboxBase.includes('?') ? `${dropboxBase}&raw=1` : `${dropboxBase}?raw=1`;
+
+                    // 2. Title को सुरक्षित करें
+                    const videoTitle = encodeURIComponent(`EP ${epNo} - ${epTxt}`);
+
+                    // 3. Final Intent (Just Player: com.kieling.whitescreen)
+                    const intentUrl = `intent://${finalDirectLink}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=${videoTitle};B.force_no_download=true;end`;
+
+                    const btn = document.createElement('a');
+                    btn.href = intentUrl;
+                    btn.className = "ep-link";
+                    
+                    btn.onclick = function() {
+                        document.querySelectorAll('.ep-link').forEach(el => el.classList.remove('active'));
                         this.classList.add('active');
                     };
-                    a.innerHTML = `<span class="ep-text">EP ${epNo}</span><span class="ep-sub">${epTxt}</span>`;
-                    grid.appendChild(a);
+
+                    btn.innerHTML = `
+                        <span class="ep-text">EP ${epNo}</span>
+                        <span class="ep-sub">${epTxt}</span>
+                    `;
+                    grid.appendChild(btn);
                 }
             });
+        } else {
+            mainContainer.innerHTML = "<p style='margin-top:50px; opacity:0.5;'>No episodes found.</p>";
         }
     </script>
 </body>
