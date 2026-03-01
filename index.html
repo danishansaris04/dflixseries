@@ -52,30 +52,30 @@
         if (fullQuery.includes('ids=')) {
             const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
 
-            // 1. Sabse upar SEASON 1 ka title (Sirf ek baar)
+            // Season Header (Sirf ek baar upar)
             const h = document.createElement('div');
             h.className = 'season-title';
             h.innerText = "SEASON 1";
             mainContainer.appendChild(h);
 
-            // 2. Ek common grid saare episodes ke liye
             const grid = document.createElement('div');
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // 3. Episode Extractor
-            // Yeh "S1" ya beech ke kisi bhi Season tag ko ignore karega aur sirf episodes uthayega
+            // Episode Extractor
             const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
             let match;
 
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
-                let epLink = match[2].trim();
+                let epLink = match[2].trim().replace(/,$/, ''); // Clean comma at end
 
-                // Link cleaning (Extra comma ya S tags hatane ke liye)
-                let cleanLink = epLink.split(',S')[0].replace(/,$/, '');
-
-                const intentUrl = `intent://www.dropbox.com/scl/fi/${cleanLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+                // --- Video Playback Logic Fix ---
+                // Agar link mein '?' hai toh '&raw=1' lagao, warna '?raw=1' lagao
+                let finalDropboxUrl = epLink.includes('?') ? `${epLink}&raw=1` : `${epLink}?raw=1`;
+                
+                // Intent URL build karein
+                const intentUrl = `intent://www.dropbox.com/scl/fi/${finalDropboxUrl}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
                 btn.href = intentUrl;
