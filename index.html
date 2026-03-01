@@ -14,31 +14,31 @@
         .error-btn { background: var(--red); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; font-weight: bold; }
 
         .season-title {
-            max-width: 900px; margin: 30px auto 15px;
+            max-width: 900px; margin: 40px auto 15px;
             padding: 15px 20px; border-left: 5px solid var(--red);
-            font-size: 20px; font-weight: 700; background: #111; text-align: left;
+            font-size: 22px; font-weight: 700; background: #111; text-align: left;
             text-transform: uppercase; border-radius: 0 8px 8px 0;
         }
 
         .ep-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px; max-width: 900px; margin: 0 auto 30px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px; max-width: 900px; margin: 0 auto 30px;
         }
 
         .ep-link {
             background: var(--card); border: 1px solid #222;
-            padding: 20px 10px; border-radius: 12px;
+            padding: 22px 10px; border-radius: 10px;
             text-decoration: none; color: white;
             transition: 0.3s; display: block;
         }
 
         .ep-link:hover {
-            background: var(--red); transform: translateY(-5px);
-            border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
+            background: var(--red); transform: scale(1.05);
+            border-color: #fff; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4);
         }
 
         .ep-text { font-size: 16px; font-weight: 700; display: block; }
-        .ep-sub { display: block; font-size: 10px; opacity: 0.5; margin-top: 8px; text-transform: uppercase; }
+        .ep-sub { display: block; font-size: 9px; opacity: 0.6; margin-top: 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -56,52 +56,59 @@
 
     <script>
         const mainContainer = document.getElementById('mainContainer');
-        const params = new URLSearchParams(window.location.search);
-        const idsRaw = params.get('ids');
+        const urlParams = new URLSearchParams(window.location.search);
+        const idsRaw = urlParams.get('ids');
 
         if (idsRaw) {
-            // 1. Pehle Seasons ko split karo (S1, S2...)
-            const seasonParts = idsRaw.split(/,(?=S\d)/i);
+            // Step 1: Seasons ko alag karein (Split by S1, S2 etc)
+            const seasons = idsRaw.split(/(?=S\d+)/gi);
 
-            seasonParts.forEach(part => {
-                let cleanPart = part.trim();
-                
-                // Season Header lagao
-                if (cleanPart.startsWith('S')) {
-                    const seasonNum = cleanPart.match(/^S(\d+)/i)[1];
-                    const h = document.createElement('div');
-                    h.className = 'season-title';
-                    h.innerText = "SEASON " + seasonNum;
-                    mainContainer.appendChild(h);
-                    // S1, hata do taaki sirf episodes bachein
-                    cleanPart = cleanPart.replace(/^S\d+,?/, '');
+            seasons.forEach(seasonStr => {
+                let text = seasonStr.trim();
+                if (!text) return;
+
+                // Season Title nikaalein
+                let seasonName = "SERIES";
+                const seasonMatch = text.match(/^S(\d+)/i);
+                if (seasonMatch) {
+                    seasonName = "SEASON " + seasonMatch[1];
+                    text = text.replace(/^S\d+,?/, ""); // S1 hata dein
                 }
 
+                // Season Header Add karein
+                const sTitle = document.createElement('div');
+                sTitle.className = 'season-title';
+                sTitle.innerText = seasonName;
+                mainContainer.appendChild(sTitle);
+
+                // Grid Create karein
                 const grid = document.createElement('div');
                 grid.className = 'ep-grid';
                 mainContainer.appendChild(grid);
 
-                // 2. EPISODE EXTRACTOR (Magic Regex)
-                // Yeh dhoondhega "(Number)," aur uske baad ka poora link jab tak naya bracket na aaye
-                const epRegex = /\((\d+)\),([\s\S]+?)(?=\s*,\s*\(\d+\)|$)/g;
+                // Step 2: Episodes aur Links nikaalein
+                // Regex: (Number) ke baad wala sara text jab tak agla (Number) ya agla Season na aaye
+                const epRegex = /\((\d+)\),?([\s\S]+?)(?=(?:\(\d+\)|S\d+|$))/gi;
                 let match;
-
-                while ((match = epRegex.exec(cleanPart)) !== null) {
+                
+                while ((match = epRegex.exec(text)) !== null) {
                     const epNum = match[1];
-                    const epId = match[2].trim();
+                    let epLink = match[2].trim();
+                    
+                    // Agar link ke aakhir mein faltu comma reh gaya ho toh hatayein
+                    if (epLink.endsWith(',')) epLink = epLink.slice(0, -1);
 
-                    // Link build karo
-                    const intentUrl = `intent://www.dropbox.com/scl/fi/${epId}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+                    const intentUrl = `intent://www.dropbox.com/scl/fi/${epLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                     const btn = document.createElement('a');
                     btn.href = intentUrl;
                     btn.className = "ep-link";
-                    btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY IN APP</span>`;
+                    btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY NOW</span>`;
                     grid.appendChild(btn);
                 }
             });
         } else {
-            mainContainer.innerHTML = "No episodes found in URL.";
+            mainContainer.innerHTML = "<p>No IDs found in URL.</p>";
         }
     </script>
 </body>
