@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFlix Series - Episode Index</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --red: #e50914; --bg: #050505; --card: #161616; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; text-align: center; }
+        .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; margin-top: 20px; }
+        
+        #access-denied { display: none; margin-top: 100px; }
+        .error-btn { background: var(--red); color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; font-weight: bold; }
+
+        .season-title {
+            max-width: 900px; margin: 30px auto 15px;
+            padding: 15px 20px; border-left: 5px solid var(--red);
+            font-size: 20px; font-weight: 700; background: #111; text-align: left;
+            text-transform: uppercase; border-radius: 0 8px 8px 0;
+        }
+
+        .ep-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px; max-width: 900px; margin: 0 auto 30px;
+        }
+
+        .ep-link {
+            background: var(--card); border: 1px solid #222;
+            padding: 25px 10px; border-radius: 12px;
+            text-decoration: none; color: white;
+            transition: 0.3s; display: block; cursor: pointer;
+        }
+
+        .ep-link:hover {
+            background: var(--red); transform: translateY(-5px);
+            border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .ep-text { font-size: 16px; font-weight: 700; display: block; }
+        .ep-sub { display: block; font-size: 10px; opacity: 0.5; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+
+    <div id="mainContent">
+        <div class="logo">DFLIXSERIES</div>
+        <div id="mainContainer"></div>
+    </div>
+
+    <div id="access-denied">
+        <div class="logo">DFLIXSERIES</div>
+        <h1>🚫 Access Denied</h1>
+        <p>Please access this page from the official <b>DFlix Movie</b> website.</p>
+        <a href="https://dflixmovie.netlify.app" class="error-btn">Go to DFlix Movie</a>
+    </div>
+
+    <script>
+        // --- Security: Referrer Check ---
+        const allowedReferrer = "dflixmovie.netlify.app";
+        const currentReferrer = document.referrer;
+        const mainContent = document.getElementById('mainContent');
+        const deniedContent = document.getElementById('access-denied');
+
+        // Check if user is coming from authorized source
+        if (!currentReferrer.includes(allowedReferrer)) {
+            mainContent.style.display = "none";
+            deniedContent.style.display = "block";
+        } else {
+            const params = new URLSearchParams(window.location.search);
+            const idsRaw = params.get('ids');
+            const mainContainer = document.getElementById('mainContainer');
+
+            if (idsRaw) {
+                const items = idsRaw.split(',');
+                let currentGrid = null;
+                let tempLabel = "";
+
+                items.forEach((item) => {
+                    let val = item.trim();
+                    if (!val) return;
+
+                    // Season (S1, S2...)
+                    if (/^S\d+$/i.test(val)) {
+                        const h = document.createElement('div');
+                        h.className = 'season-title';
+                        h.innerText = "SEASON " + val.toUpperCase().replace('S', '');
+                        mainContainer.appendChild(h);
+
+                        const g = document.createElement('div');
+                        g.className = 'ep-grid';
+                        mainContainer.appendChild(g);
+                        currentGrid = g;
+                    } 
+                    // Label (1), (1-5)...
+                    else if (val.startsWith('(') && val.endsWith(')')) {
+                        tempLabel = val.replace('(', '').replace(')', '');
+                    } 
+                    // Dropbox ID -> Intent Link
+                    else {
+                        if (!currentGrid) {
+                            currentGrid = document.createElement('div');
+                            currentGrid.className = 'ep-grid';
+                            mainContainer.appendChild(currentGrid);
+                        }
+
+                        let displayTitle = tempLabel ? "EP " + tempLabel : "WATCH NOW";
+                        
+                        // Intent Format with White Screen package
+                        const intentUrl = `intent://www.dropbox.com/scl/fi/${val}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+
+                        const btn = document.createElement('a');
+                        btn.href = intentUrl;
+                        btn.className = "ep-link";
+                        btn.innerHTML = `<span class="ep-text">${displayTitle}</span><span class="ep-sub">PLAY IN APP</span>`;
+                        
+                        currentGrid.appendChild(btn);
+                        tempLabel = ""; 
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
