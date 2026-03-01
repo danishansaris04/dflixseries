@@ -10,8 +10,12 @@
         body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { color: var(--red); font-size: 35px; font-weight: 700; text-transform: uppercase; margin-bottom: 30px; }
         
-        /* Season title ko hide kar diya gaya hai */
-        .season-title { display: none; }
+        .season-title {
+            max-width: 900px; margin: 20px auto 15px;
+            padding: 15px 20px; border-left: 5px solid var(--red);
+            font-size: 20px; font-weight: 700; background: #111; text-align: left;
+            text-transform: uppercase; border-radius: 0 8px 8px 0;
+        }
 
         .ep-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -48,13 +52,19 @@
         if (fullQuery.includes('ids=')) {
             const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
 
-            // Ek hi common grid banate hain saare episodes ke liye
+            // 1. Sabse upar SEASON 1 ka title (Sirf ek baar)
+            const h = document.createElement('div');
+            h.className = 'season-title';
+            h.innerText = "SEASON 1";
+            mainContainer.appendChild(h);
+
+            // 2. Ek common grid saare episodes ke liye
             const grid = document.createElement('div');
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // Regex jo sirf (Episode Number) aur uske baad ka link dhoondhega
-            // Yeh "S1" jaise tags ko ignore kar dega
+            // 3. Episode Extractor
+            // Yeh "S1" ya beech ke kisi bhi Season tag ko ignore karega aur sirf episodes uthayega
             const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
             let match;
 
@@ -62,8 +72,8 @@
                 const epNum = match[1];
                 let epLink = match[2].trim();
 
-                // Link ke end mein agar extra characters ya commas hain toh clean karein
-                const cleanLink = epLink.replace(/,$/, '').split(',S')[0];
+                // Link cleaning (Extra comma ya S tags hatane ke liye)
+                let cleanLink = epLink.split(',S')[0].replace(/,$/, '');
 
                 const intentUrl = `intent://www.dropbox.com/scl/fi/${cleanLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
