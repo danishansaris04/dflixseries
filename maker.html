@@ -3,52 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFlix Admin Pro - Custom Text</title>
+    <title>DFlix Admin Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --red: #e50914; --dark-bg: #050505; --card-bg: #121212; --input-bg: #1e1e1e; --border: #2b2b2b; --text: #ffffff; --green: #2ecc71; }
+        :root { --red: #e50914; --dark: #050505; --card: #121212; --border: #2b2b2b; --green: #2ecc71; }
         * { box-sizing: border-box; transition: 0.3s; }
-        body { font-family: 'Poppins', sans-serif; background: var(--dark-bg); color: var(--text); margin: 0; padding: 15px; display: flex; justify-content: center; }
-        .admin-container { width: 100%; max-width: 950px; background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-        h1 { color: var(--red); text-align: center; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; font-size: 28px; }
-        .import-section { background: #181818; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed #444; }
-        textarea { width: 100%; background: #000; color: var(--green); border: 1px solid var(--border); padding: 12px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 13px; height: 80px; resize: none; outline: none; }
+        body { font-family: 'Poppins', sans-serif; background: var(--dark); color: white; margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 950px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--border); }
+        h1 { color: var(--red); text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+        .import-box { background: #181818; padding: 15px; border-radius: 12px; margin-bottom: 25px; border: 1px dashed #444; }
+        textarea { width: 100%; background: #000; color: var(--green); border: 1px solid var(--border); padding: 12px; border-radius: 8px; height: 80px; resize: none; outline: none; font-family: monospace; }
         .season-block { background: #1a1a1a; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid var(--border); }
-        .season-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .season-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .season-name { background: transparent; border: none; color: var(--red); font-size: 20px; font-weight: 700; width: 120px; outline: none; }
-        .episode-row { display: grid; grid-template-columns: 60px 150px 1fr 45px; gap: 10px; margin-bottom: 10px; align-items: center; background: #222; padding: 8px; border-radius: 10px; }
-        input { background: var(--input-bg); border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; outline: none; font-size: 13px; }
+        .episode-row { display: grid; grid-template-columns: 60px 140px 1fr 45px; gap: 10px; margin-bottom: 10px; align-items: center; background: #222; padding: 8px; border-radius: 10px; }
+        input { background: #1e1e1e; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 8px; outline: none; font-size: 13px; }
         .btn { cursor: pointer; border: none; font-weight: 600; border-radius: 8px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; }
-        .btn-import { background: transparent; color: #fff; border: 1px solid var(--red); width: 100%; padding: 12px; margin-top: 10px; }
-        .btn-add-ep { background: #333; color: #fff; padding: 10px; width: 100%; margin-top: 5px; }
-        .btn-add-season { background: #0056b3; color: #fff; padding: 15px; margin-bottom: 15px; width: 100%; }
+        .btn-add { background: #333; color: #fff; padding: 10px; width: 100%; margin-top: 5px; }
+        .btn-main { background: var(--red); color: #fff; padding: 15px; width: 100%; font-size: 16px; margin-top: 10px; }
         .btn-del { background: #441111; color: #ff9999; height: 35px; width: 35px; }
-        .btn-generate { background: var(--red); color: #fff; padding: 18px; width: 100%; font-size: 18px; margin-top: 10px; }
         #resultArea { margin-top: 30px; display: none; background: #000; border: 1px solid var(--red); padding: 20px; border-radius: 15px; }
-        #finalUrlDisplay { word-break: break-all; font-family: monospace; color: var(--green); font-size: 12px; display: block; margin-bottom: 20px; padding: 15px; background: #080808; border-radius: 10px; max-height: 150px; overflow-y: auto; }
+        #finalUrl { word-break: break-all; font-family: monospace; color: var(--green); font-size: 11px; display: block; margin-bottom: 15px; padding: 10px; background: #080808; border-radius: 8px; }
         @media (max-width: 600px) { .episode-row { grid-template-columns: 50px 1fr; } .btn-del-row { grid-column: span 2; } }
     </style>
 </head>
 <body>
-<div class="admin-container">
+<div class="container">
     <h1>DFlix Admin Pro</h1>
-    <div class="import-section">
-        <textarea id="importUrl" placeholder="Paste Existing URL here..."></textarea>
-        <button class="btn btn-import" onclick="importOldUrl()">Load Existing Data</button>
+    <div class="import-box">
+        <textarea id="importUrl" placeholder="Paste existing Netlify URL here to edit..."></textarea>
+        <button class="btn btn-add" style="margin-top:10px; border:1px solid var(--red)" onclick="importData()">Load Data</button>
     </div>
     <div id="masterContainer"></div>
-    <button class="btn btn-add-season" onclick="addNewSeason()">+ Add New Season</button>
-    <button class="btn btn-generate" onclick="buildFinalUrl()">Generate Link</button>
+    <button class="btn btn-add" style="background:#0056b3; padding:15px;" onclick="addSeason()">+ Add New Season</button>
+    <button class="btn btn-main" onclick="generate()">Generate DFlix Link</button>
     <div id="resultArea">
-        <span id="finalUrlDisplay"></span>
-        <button class="btn btn-generate" style="font-size: 14px;" onclick="copyToClipboard()">Copy Link</button>
+        <span id="finalUrl"></span>
+        <button class="btn btn-main" style="font-size:14px;" onclick="copy()">Copy to Clipboard</button>
     </div>
 </div>
 
 <script>
-    function addNewSeason(name = "") {
-        const sName = name || `S${document.querySelectorAll('.season-block').length + 1}`;
+    function addSeason(name = "") {
         const sId = `s-${Date.now()}`;
+        const sName = name || `S${document.querySelectorAll('.season-block').length + 1}`;
         document.getElementById('masterContainer').insertAdjacentHTML('beforeend', `
             <div class="season-block" id="${sId}">
                 <div class="season-header">
@@ -56,63 +54,89 @@
                     <button class="btn btn-del" onclick="document.getElementById('${sId}').remove()">✕</button>
                 </div>
                 <div class="ep-list"></div>
-                <button class="btn btn-add-ep" onclick="addEpisodeRow('${sId}')">+ Add Episode</button>
+                <button class="btn btn-add" onclick="addEpisode('${sId}')">+ Add Episode</button>
             </div>`);
         return sId;
     }
 
-    function addEpisodeRow(sId, no = "", txt = "WATCH NOW", link = "") {
+    function addEpisode(sId, no = "", txt = "480p", link = "") {
         const list = document.querySelector(`#${sId} .ep-list`);
-        const rowId = 'r-' + Math.random().toString(36).substr(2, 5);
+        const rId = 'r-' + Math.random().toString(36).substr(2, 5);
         if(!no) no = list.children.length + 1;
         list.insertAdjacentHTML('beforeend', `
-            <div class="episode-row" id="${rowId}">
+            <div class="episode-row" id="${rId}">
                 <input type="text" class="ep-no" placeholder="No." value="${no}">
-                <input type="text" class="ep-txt" placeholder="Extra Text" value="${txt}">
+                <input type="text" class="ep-txt" placeholder="Text" value="${txt}">
                 <input type="text" class="ep-link" placeholder="Dropbox Link" value="${link}">
-                <button class="btn btn-del btn-del-row" onclick="document.getElementById('${rowId}').remove()">✕</button>
+                <button class="btn btn-del btn-del-row" onclick="document.getElementById('${rId}').remove()">✕</button>
             </div>`);
     }
 
-    function importOldUrl() {
-        const rawUrl = document.getElementById('importUrl').value.trim();
-        if (!rawUrl.includes('?ids=')) return;
-        document.getElementById('masterContainer').innerHTML = "";
-        const content = decodeURIComponent(rawUrl.split('?ids=')[1]);
-        content.split(/,(?=S\d+)/).forEach(chunk => {
-            const sMatch = chunk.match(/^(S\d+)/);
-            if (!sMatch) return;
-            const sId = addNewSeason(sMatch[0]);
-            const epRegex = /\((\d+)\),\(([^)]+)\),\(([^)]+)\)/g; // 3 brackets format
-            let m;
-            while ((m = epRegex.exec(chunk)) !== null) {
-                let link = m[3].startsWith('http') ? m[3] : "https://www.dropbox.com/scl/fi/" + m[3];
-                addEpisodeRow(sId, m[1], m[2], link);
-            }
-        });
-    }
-
-    function buildFinalUrl() {
+    function generate() {
         let data = [];
         document.querySelectorAll('.season-block').forEach(s => {
             let sTitle = s.querySelector('.season-name').value.trim();
             let eps = [];
             s.querySelectorAll('.episode-row').forEach(row => {
                 let n = row.querySelector('.ep-no').value.trim();
-                let t = row.querySelector('.ep-txt').value.trim() || "WATCH NOW";
+                let t = row.querySelector('.ep-txt').value.trim();
                 let l = row.querySelector('.ep-link').value.trim();
-                if (l.includes('/fi/')) l = l.split('/fi/')[1].split('?')[0];
+                if (l.includes('/fi/')) l = l.split('/fi/')[1].replace(/[?&]dl=0/g, "");
                 if (n && l) eps.push(`(${n}),(${t}),(${l})`);
             });
             if (eps.length) data.push(sTitle + "," + eps.join(','));
         });
-        document.getElementById('finalUrlDisplay').innerText = "https://dflixseries.netlify.app/?ids=" + data.join(',');
+        document.getElementById('finalUrl').innerText = "https://dflixseries.netlify.app/?ids=" + data.join(',');
         document.getElementById('resultArea').style.display = 'block';
     }
 
-    function copyToClipboard() {
-        navigator.clipboard.writeText(document.getElementById('finalUrlDisplay').innerText);
-        alert("Copied!");
+    // UPDATED COPY FUNCTION WITH FALLBACK
+    function copy() {
+        const textToCopy = document.getElementById('finalUrl').innerText;
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("Link Copied!");
+            }).catch(() => fallbackCopy(textToCopy));
+        } else {
+            fallbackCopy(textToCopy);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        // Ensure textarea is not visible but part of DOM
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        textArea.style.top = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert("Link Copied!");
+        } catch (err) {
+            alert("Copy failed, please copy manually.");
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function importData() {
+        const url = document.getElementById('importUrl').value.trim();
+        if (!url.includes('?ids=')) return;
+        document.getElementById('masterContainer').innerHTML = "";
+        const content = decodeURIComponent(url.split('?ids=')[1]);
+        content.split(/,(?=S\d+)/).forEach(chunk => {
+            const sMatch = chunk.match(/^(S\d+)/);
+            if (!sMatch) return;
+            const sId = addSeason(sMatch[0]);
+            const epRegex = /\((\d+)\),\(([^)]+)\),\(([^)]+)\)/g;
+            let m;
+            while ((m = epRegex.exec(chunk)) !== null) {
+                addEpisode(sId, m[1], m[2], m[3]);
+            }
+        });
     }
 </script>
 </body>
