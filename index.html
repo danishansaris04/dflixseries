@@ -50,9 +50,10 @@
         const fullQuery = window.location.search;
 
         if (fullQuery.includes('ids=')) {
+            // Poore string ko decode karein bina kisi cut ke
             const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
 
-            // Season Header (Sirf ek baar upar)
+            // Season Header (Sirf ek baar)
             const h = document.createElement('div');
             h.className = 'season-title';
             h.innerText = "SEASON 1";
@@ -62,29 +63,36 @@
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // Episode Extractor
+            // UPDATED REGEX:
+            // Yeh (number) ke baad ka sab kuch lega jab tak agla (number) ya S1 na aa jaye
             const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
             let match;
 
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
-                let epLink = match[2].trim().replace(/,$/, ''); // Clean comma at end
+                let epFullLink = match[2].trim();
 
-                // --- Video Playback Logic Fix ---
-                // Agar link mein '?' hai toh '&raw=1' lagao, warna '?raw=1' lagao
-                let finalDropboxUrl = epLink.includes('?') ? `${epLink}&raw=1` : `${epLink}?raw=1`;
-                
-                // Intent URL build karein
-                const intentUrl = `intent://www.dropbox.com/scl/fi/${finalDropboxUrl}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+                // Link ke end mein agar split comma reh gaya ho toh hatao
+                if (epFullLink.endsWith(',')) epFullLink = epFullLink.slice(0, -1);
+
+                // --- DROPBOX STREAMING FIX ---
+                // Agar link mein '?' hai (jo ki rlkey ke liye hai), toh hum '&raw=1' add karenge
+                // Taki Dropbox direct stream serve kare
+                let streamingUrl = epFullLink.includes('?') ? 
+                                   `${epFullLink}&raw=1` : 
+                                   `${epFullLink}?raw=1`;
+
+                // Intent format for White Screen / MX Player
+                const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingUrl}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
                 btn.href = intentUrl;
                 btn.className = "ep-link";
-                btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">WATCH NOW</span>`;
+                btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY VIDEO</span>`;
                 grid.appendChild(btn);
             }
         } else {
-            mainContainer.innerHTML = "No IDs found.";
+            mainContainer.innerHTML = "No Episodes Found.";
         }
     </script>
 </body>
