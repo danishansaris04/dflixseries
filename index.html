@@ -50,68 +50,58 @@
 
     <div id="access-denied">
         <h1>🚫 Access Denied</h1>
-        <p>Please access from official website.</p>
+        <p>Please access from the official website.</p>
         <a href="https://dflixmovie.netlify.app" class="error-btn">Go to DFlix Movie</a>
     </div>
 
     <script>
-        const allowedReferrer = "dflixmovie.netlify.app";
-        const currentReferrer = document.referrer;
         const mainContainer = document.getElementById('mainContainer');
+        const params = new URLSearchParams(window.location.search);
+        const idsRaw = params.get('ids');
 
-        // Security Check
-        if (currentReferrer !== "" && !currentReferrer.includes(allowedReferrer)) {
-            document.getElementById('mainContent').style.display = "none";
-            document.getElementById('access-denied').style.display = "block";
-        } else {
-            const params = new URLSearchParams(window.location.search);
-            const idsRaw = params.get('ids');
+        if (idsRaw) {
+            // 1. Pehle Seasons ko split karo (S1, S2...)
+            const seasonParts = idsRaw.split(/,(?=S\d)/i);
 
-            if (idsRaw) {
-                // STEP 1: Season titles ko handle karein (S1, S2...)
-                const sections = idsRaw.split(/,(?=S\d)/i);
+            seasonParts.forEach(part => {
+                let cleanPart = part.trim();
                 
-                sections.forEach(section => {
-                    let currentGrid = document.createElement('div');
-                    currentGrid.className = 'ep-grid';
+                // Season Header lagao
+                if (cleanPart.startsWith('S')) {
+                    const seasonNum = cleanPart.match(/^S(\d+)/i)[1];
+                    const h = document.createElement('div');
+                    h.className = 'season-title';
+                    h.innerText = "SEASON " + seasonNum;
+                    mainContainer.appendChild(h);
+                    // S1, hata do taaki sirf episodes bachein
+                    cleanPart = cleanPart.replace(/^S\d+,?/, '');
+                }
 
-                    // Check if section starts with Season tag
-                    if (section.trim().startsWith('S')) {
-                        const seasonMatch = section.match(/^S(\d+)/i);
-                        if (seasonMatch) {
-                            const h = document.createElement('div');
-                            h.className = 'season-title';
-                            h.innerText = "SEASON " + seasonMatch[1];
-                            mainContainer.appendChild(h);
-                            section = section.replace(/^S\d+,?/, ''); // Remove S1 from string
-                        }
-                    }
+                const grid = document.createElement('div');
+                grid.className = 'ep-grid';
+                mainContainer.appendChild(grid);
 
-                    mainContainer.appendChild(currentGrid);
+                // 2. EPISODE EXTRACTOR (Magic Regex)
+                // Yeh dhoondhega "(Number)," aur uske baad ka poora link jab tak naya bracket na aaye
+                const epRegex = /\((\d+)\),([\s\S]+?)(?=\s*,\s*\(\d+\)|$)/g;
+                let match;
 
-                    // STEP 2: Episodes ko nikaalein (Pattern: (Number),Link)
-                    // Hum regex use kar rahe hain jo "(n)," dhoondhega
-                    const epRegex = /\((\d+)\),([\s\S]+?)(?=\s*,\s*\(\d+\)|$)/g;
-                    let match;
-                    let foundAny = false;
+                while ((match = epRegex.exec(cleanPart)) !== null) {
+                    const epNum = match[1];
+                    const epId = match[2].trim();
 
-                    while ((match = epRegex.exec(section)) !== null) {
-                        foundAny = true;
-                        const epNum = match[1];
-                        const epLink = match[2].trim();
+                    // Link build karo
+                    const intentUrl = `intent://www.dropbox.com/scl/fi/${epId}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
-                        const intentUrl = `intent://www.dropbox.com/scl/fi/${epLink}&raw=1#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
-
-                        const btn = document.createElement('a');
-                        btn.href = intentUrl;
-                        btn.className = "ep-link";
-                        btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY IN APP</span>`;
-                        currentGrid.appendChild(btn);
-                    }
-                });
-            } else {
-                mainContainer.innerHTML = "No Episodes Found.";
-            }
+                    const btn = document.createElement('a');
+                    btn.href = intentUrl;
+                    btn.className = "ep-link";
+                    btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY IN APP</span>`;
+                    grid.appendChild(btn);
+                }
+            });
+        } else {
+            mainContainer.innerHTML = "No episodes found in URL.";
         }
     </script>
 </body>
