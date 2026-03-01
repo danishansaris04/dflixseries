@@ -3,171 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DFlix Admin - Multi-Season Pro</title>
+    <title>DFlix Admin Pro - Auto Magic</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --red: #e50914; --dark-bg: #0a0a0a; --card-bg: #141414; --input-bg: #2a2a2a; }
-        body { font-family: 'Poppins', sans-serif; background: var(--dark-bg); color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .admin-container { width: 100%; max-width: 800px; background: var(--card-bg); padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 50px rgba(0,0,0,0.7); }
-        
-        h1 { color: var(--red); text-align: center; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 40px; font-weight: 700; }
-        
-        .season-block { background: #1a1a1a; padding: 25px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #333; position: relative; transition: 0.3s; }
-        .season-block:hover { border-color: var(--red); }
-        
-        .season-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .season-title-input { background: transparent; border: none; color: var(--red); font-size: 20px; font-weight: 700; width: 80px; outline: none; }
-        
-        .episode-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        input { background: var(--input-bg); border: 1px solid #444; color: #fff; padding: 12px; border-radius: 6px; outline: none; transition: 0.2s; font-size: 14px; }
-        input:focus { border-color: var(--red); background: #333; }
-        input.range { width: 90px; flex: none; text-align: center; font-weight: bold; }
-        input.link { flex: 1; }
+        :root {
+            --red: #e50914;
+            --dark-bg: #050505;
+            --card-bg: #121212;
+            --input-bg: #1e1e1e;
+            --border: #2b2b2b;
+            --text: #ffffff;
+            --green: #2ecc71;
+        }
 
-        .btn { cursor: pointer; border: none; font-weight: 600; border-radius: 6px; transition: 0.2s; text-transform: uppercase; }
-        .btn-add-ep { background: #333; color: #fff; padding: 8px 15px; font-size: 11px; }
-        .btn-add-ep:hover { background: #444; }
-        
-        .btn-del { background: transparent; color: #666; font-size: 18px; padding: 0 10px; }
-        .btn-del:hover { color: var(--red); }
-        
-        .controls { display: flex; flex-direction: column; gap: 15px; margin-top: 30px; }
-        .btn-add-season { background: transparent; color: #fff; border: 2px dashed #444; padding: 15px; font-size: 16px; }
-        .btn-add-season:hover { border-color: var(--red); color: var(--red); }
-        
-        .btn-generate { background: var(--red); color: #fff; padding: 18px; font-size: 18px; letter-spacing: 1px; box-shadow: 0 5px 20px rgba(229, 9, 20, 0.4); }
-        .btn-generate:hover { transform: translateY(-2px); background: #ff101a; }
+        * { box-sizing: border-box; transition: 0.3s; }
 
-        #resultArea { margin-top: 35px; display: none; background: #050505; border: 1px solid var(--red); padding: 25px; border-radius: 10px; }
-        .result-url { word-break: break-all; font-family: 'Courier New', monospace; color: #00ff00; font-size: 13px; margin-bottom: 20px; display: block; line-height: 1.6; }
-        
-        .copy-info { font-size: 11px; color: #666; text-align: center; display: block; margin-top: 10px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        h1 {
+            color: var(--red);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+
+        .import-section {
+            background: #181818;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px dashed #444;
+        }
+
+        textarea {
+            width: 100%;
+            background: #000;
+            color: var(--green);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            height: 90px;
+            resize: none;
+            outline: none;
+        }
+
+        .season-block {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border);
+        }
+
+        .season-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .season-name {
+            background: transparent;
+            border: none;
+            color: var(--red);
+            font-size: 20px;
+            font-weight: 700;
+            width: 100px;
+            outline: none;
+        }
+
+        .episode-row {
+            display: grid;
+            grid-template-columns: 70px 1fr 45px;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            background: #222;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        input {
+            background: var(--input-bg);
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .btn {
+            cursor: pointer;
+            border: none;
+            font-weight: 600;
+            border-radius: 8px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-import {
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--red);
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-import:hover { background: var(--red); }
+
+        .btn-add-ep {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .btn-add-season {
+            background: #0056b3;
+            color: #fff;
+            padding: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .btn-del {
+            background: #441111;
+            color: #ff9999;
+            height: 40px;
+            width: 40px;
+        }
+
+        .btn-generate {
+            background: var(--red);
+            color: #fff;
+            padding: 18px;
+            width: 100%;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        #resultArea {
+            margin-top: 30px;
+            display: none;
+            background: #000;
+            border: 1px solid var(--red);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        #finalUrlDisplay {
+            word-break: break-all;
+            font-family: monospace;
+            color: var(--green);
+            font-size: 12px;
+            display: block;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #080808;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 600px) {
+            .episode-row { grid-template-columns: 60px 1fr; }
+            .btn-del-row { grid-column: span 2; width: 100%; height: 35px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="admin-container">
     <h1>DFlix Admin Pro</h1>
-    
-    <div id="masterContainer">
-        <div class="season-block" id="season-1">
-            <div class="season-header">
-                <input type="text" class="season-name" value="S1">
-                <button class="btn btn-del" onclick="removeBlock('season-1')" title="Delete Season">×</button>
-            </div>
-            <div class="ep-list">
-                <div class="episode-row" id="s1-ep1">
-                    <input type="text" class="range" placeholder="Range">
-                    <input type="text" class="link" placeholder="Paste Full Dropbox Link Here">
-                    <button class="btn btn-del" onclick="removeBlock('s1-ep1')" title="Remove Row">×</button>
-                </div>
-            </div>
-            <button class="btn btn-add-ep" onclick="addEpisodeRow(1)">+ Add Episode Range</button>
-        </div>
-    </div>
 
-    <div class="controls">
-        <button class="btn btn-add-season" onclick="addNewSeason()">+ Add New Season Block</button>
-        <button class="btn btn-generate" onclick="buildFinalUrl()">Build Final Index URL</button>
+    <div class="import-section">
+        <textarea id="importUrl" placeholder="Paste Existing Index URL here..."></textarea>
+        <button class="btn btn-import" onclick="importOldUrl()">Load Existing Data</button>
     </div>
+    
+    <div id="masterContainer"></div>
+
+    <button class="btn btn-add-season" onclick="addNewSeason()">+ Add New Season Block</button>
+    <button class="btn btn-generate" onclick="buildFinalUrl()">Generate Final Index Link</button>
 
     <div id="resultArea">
-        <label style="color: var(--red); font-size: 12px; font-weight: bold; text-transform: uppercase;">Generated Link:</label>
-        <span class="result-url" id="finalUrlDisplay"></span>
-        <button class="btn btn-generate" style="font-size: 14px; padding: 12px;" onclick="copyToClipboard()">Copy Result URL</button>
-        <span class="copy-info">Click the button to copy the link for your Netlify Index page.</span>
+        <span id="finalUrlDisplay"></span>
+        <button class="btn btn-generate" style="font-size: 14px;" onclick="copyToClipboard()">Copy to Clipboard</button>
     </div>
 </div>
 
 <script>
-    let sIdx = 1;
-    let epIdx = 1;
-
-    function addNewSeason() {
-        sIdx++;
+    function addNewSeason(name = "") {
+        // Auto Season Logic
+        const existingSeasons = document.querySelectorAll('.season-block').length;
+        const sName = name || `S${existingSeasons + 1}`;
+        
         const container = document.getElementById('masterContainer');
-        const html = `
-            <div class="season-block" id="season-${sIdx}">
+        const sId = `season-block-${Date.now()}`;
+        
+        container.insertAdjacentHTML('beforeend', `
+            <div class="season-block" id="${sId}">
                 <div class="season-header">
-                    <input type="text" class="season-name" value="S${sIdx}">
-                    <button class="btn btn-del" onclick="removeBlock('season-${sIdx}')">×</button>
+                    <input type="text" class="season-name" value="${sName}">
+                    <button class="btn btn-del" onclick="document.getElementById('${sId}').remove()">✕</button>
                 </div>
-                <div class="ep-list">
-                    <div class="episode-row" id="s${sIdx}-ep${++epIdx}">
-                        <input type="text" class="range" placeholder="Range">
-                        <input type="text" class="link" placeholder="Link">
-                        <button class="btn btn-del" onclick="removeBlock('s${sIdx}-ep${epIdx}')">×</button>
-                    </div>
-                </div>
-                <button class="btn btn-add-ep" onclick="addEpisodeRow(${sIdx})">+ Add Episode Range</button>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', html);
+                <div class="ep-list"></div>
+                <button class="btn btn-add-ep" onclick="addEpisodeRow('${sId}')">+ Add Episode</button>
+            </div>`);
+        return sId;
     }
 
-    function addEpisodeRow(id) {
-        const list = document.querySelector(`#season-${id} .ep-list`);
-        const rowId = `s${id}-ep${++epIdx}`;
-        const html = `
-            <div class="episode-row" id="${rowId}">
-                <input type="text" class="range" placeholder="Range">
-                <input type="text" class="link" placeholder="Link">
-                <button class="btn btn-del" onclick="removeBlock('${rowId}')">×</button>
-            </div>`;
-        list.insertAdjacentHTML('beforeend', html);
-    }
-
-    function removeBlock(id) {
-        const el = document.getElementById(id);
-        if (el) el.remove();
-    }
-
-    function cleanDropboxPath(url) {
-        if (!url.includes('dropbox.com')) return url.trim();
-        // Dropbox link se fi/ ke baad ka pura path (with rlkey, st etc.) nikalne ke liye
-        const match = url.match(/\/fi\/(.+)$/i);
-        if (match) {
-            return match[1].split('?dl=0')[0].split('&dl=0')[0];
+    function addEpisodeRow(sId, range = "", link = "") {
+        const list = document.querySelector(`#${sId} .ep-list`);
+        
+        // Auto Episode Number Logic
+        let nextEp = range;
+        if (nextEp === "") {
+            const lastEpInput = list.querySelector('.episode-row:last-child .range');
+            if (lastEpInput) {
+                nextEp = parseInt(lastEpInput.value) + 1;
+            } else {
+                nextEp = 1;
+            }
         }
-        return url.trim();
+
+        const rowId = 'row-' + Math.random().toString(36).substr(2, 5);
+        list.insertAdjacentHTML('beforeend', `
+            <div class="episode-row" id="${rowId}">
+                <input type="text" class="range" placeholder="No." value="${nextEp}">
+                <input type="text" class="link" placeholder="Dropbox Link" value="${link}">
+                <button class="btn btn-del btn-del-row" onclick="document.getElementById('${rowId}').remove()">✕</button>
+            </div>`);
+    }
+
+    function importOldUrl() {
+        const rawUrl = document.getElementById('importUrl').value.trim();
+        if (!rawUrl.includes('?ids=')) return alert("Invalid URL!");
+
+        document.getElementById('masterContainer').innerHTML = "";
+        const idsPart = decodeURIComponent(rawUrl.split('?ids=')[1]);
+        const seasonChunks = idsPart.split(/,(?=S\d)/);
+        
+        seasonChunks.forEach(chunk => {
+            const sName = (chunk.match(/^S\d+/) || ["S1"])[0];
+            const sId = addNewSeason(sName);
+            const epRegex = /\((\d+)\),\(([\s\S]+?)\)/g;
+            let m;
+            while ((m = epRegex.exec(chunk)) !== null) {
+                addEpisodeRow(sId, m[1], "https://www.dropbox.com/scl/fi/" + m[2]);
+            }
+        });
+        alert("Data Loaded!");
     }
 
     function buildFinalUrl() {
-        const baseUrl = "https://dflixseries.netlify.app/?ids=";
-        let parts = [];
-
+        let finalParts = [];
         document.querySelectorAll('.season-block').forEach(s => {
-            const sTitle = s.querySelector('.season-name').value.trim();
-            parts.push(sTitle);
-
+            finalParts.push(s.querySelector('.season-name').value.trim());
             s.querySelectorAll('.episode-row').forEach(row => {
-                const range = row.querySelector('.range').value.trim();
-                const rawLink = row.querySelector('.link').value.trim();
-
-                if (range && rawLink) {
-                    const shortPath = cleanDropboxPath(rawLink);
-                    parts.push(`(${range})`, shortPath);
+                const n = row.querySelector('.range').value.trim();
+                let l = row.querySelector('.link').value.trim();
+                if (n && l) {
+                    if (l.includes('/fi/')) l = l.split('/fi/')[1];
+                    l = l.replace(/[?&]dl=0/g, "");
+                    finalParts.push(`(${n})`, `(${l})`);
                 }
             });
         });
-
-        if (parts.length <= 1) {
-            alert("Please add at least one season and episode link!");
-            return;
-        }
-
-        const fullUrl = baseUrl + parts.join(',');
-        document.getElementById('finalUrlDisplay').innerText = fullUrl;
+        document.getElementById('finalUrlDisplay').innerText = "https://dflixseries.netlify.app/?ids=" + finalParts.join(',');
         document.getElementById('resultArea').style.display = 'block';
         window.scrollTo(0, document.body.scrollHeight);
     }
 
     function copyToClipboard() {
-        const text = document.getElementById('finalUrlDisplay').innerText;
-        navigator.clipboard.writeText(text).then(() => alert("URL Copied to Clipboard!"));
+        navigator.clipboard.writeText(document.getElementById('finalUrlDisplay').innerText);
+        alert("Link Copied!");
     }
 </script>
-
 </body>
 </html>
