@@ -47,10 +47,11 @@
 
     <script>
         const mainContainer = document.getElementById('mainContainer');
-        const fullQuery = window.location.search;
+        const currentUrl = window.location.href;
 
-        if (fullQuery.includes('ids=')) {
-            const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
+        if (currentUrl.includes('ids=')) {
+            // Raw content nikaalein
+            const idsContent = decodeURIComponent(currentUrl.split('ids=')[1]);
 
             // Season Header
             const h = document.createElement('div');
@@ -62,33 +63,31 @@
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // REGEX: (number), ke baad ka sab lega jab tak agla bracket ya S tag na mile
-            const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
+            // NEW REGEX: Yeh do brackets ke pair dhoondhega (Num) aur (Link)
+            // Pattern: (number),(link)
+            const epRegex = /\((\d+)\),\(([\s\S]+?)\)/g;
             let match;
 
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
-                let rawLink = match[2].trim();
+                let epFullLink = match[2].trim();
 
-                // 1. Agar link ke aakhir mein comma reh gaya ho toh delete karein
-                if (rawLink.endsWith(',')) rawLink = rawLink.slice(0, -1);
+                // Dropbox raw streaming suffix add karein
+                let streamingUrl = epFullLink.includes('?') ? 
+                                   `${epFullLink}&raw=1` : 
+                                   `${epFullLink}?raw=1`;
 
-                // 2. Dropbox Streaming Fix: 
-                // Link ke parameters ke baad &raw=1 lagana taaki file download ke bajaye play ho
-                let streamingLink = rawLink.includes('?') ? `${rawLink}&raw=1` : `${rawLink}?raw=1`;
-
-                // 3. Exact Intent Link Construction
-                // Package: com.kieling.whitescreen (Aap ise com.brouken.player bhi kar sakte hain)
-                const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingLink}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+                // Final Intent link (Package: Just Player)
+                const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingUrl}#Intent;scheme=https;type=video/*;package=com.brouken.player;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
                 btn.href = intentUrl;
                 btn.className = "ep-link";
-                btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">PLAY VIDEO</span>`;
+                btn.innerHTML = `<span class="ep-text">EP ${epNum}</span><span class="ep-sub">WATCH NOW</span>`;
                 grid.appendChild(btn);
             }
         } else {
-            mainContainer.innerHTML = "No Episodes Found.";
+            mainContainer.innerHTML = "No episodes found.";
         }
     </script>
 </body>
