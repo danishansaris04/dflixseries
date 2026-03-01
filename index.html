@@ -17,10 +17,12 @@
         .ep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto 30px; }
         .ep-link { background: var(--card); border: 1px solid #222; padding: 20px 10px; border-radius: 12px; text-decoration: none; color: white; transition: 0.3s; display: block; }
         .ep-link:hover { background: var(--red); transform: translateY(-5px); border-color: #fff; box-shadow: 0 8px 20px rgba(229, 9, 20, 0.4); }
-        .ep-link.active { border-color: var(--red); background: rgba(229, 9, 20, 0.15); }
+        
+        /* Highlight for the episode currently being played */
+        .ep-link.active { border-color: var(--red); background: rgba(229, 9, 20, 0.2); box-shadow: inset 0 0 10px rgba(229, 9, 20, 0.5); }
+        
         .ep-text { font-size: 16px; font-weight: 700; display: block; }
         .ep-sub { display: block; font-size: 10px; opacity: 0.5; margin-top: 8px; text-transform: uppercase; }
-        .error-msg { margin-top: 50px; color: #ff4444; font-size: 18px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -31,24 +33,13 @@
     </div>
 
     <script>
-        // --- DOMAIN LOCK START ---
-        const allowedDomain = "dflixmovie.netlify.app";
-        if (window.location.hostname !== allowedDomain) {
-            document.body.innerHTML = `
-                <div class="error-msg">
-                    <h2>🚫 Access Denied</h2>
-                    <p>This content is exclusive to ${allowedDomain}</p>
-                </div>`;
-            throw new Error("Unauthorized domain"); // Stops script execution
-        }
-        // --- DOMAIN LOCK END ---
-
         const mainContainer = document.getElementById('mainContainer');
         const currentUrl = window.location.href;
 
         if (currentUrl.includes('ids=')) {
             const idsContent = decodeURIComponent(currentUrl.split('ids=')[1]);
 
+            // Season Header
             const h = document.createElement('div');
             h.className = 'season-title';
             h.innerText = "SEASON 1";
@@ -65,19 +56,21 @@
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
                 let epFullLink = match[2].trim();
+
+                // Dropbox/Direct link formatting
                 let streamingUrl = epFullLink.includes('?') ? `${epFullLink}&raw=1` : `${epFullLink}?raw=1`;
 
-                // Dynamic Title for Just Player
-                const videoTitle = encodeURIComponent(`DFlix: Episode ${epNum}`);
+                // Dynamic Player Title
+                const videoTitle = encodeURIComponent(`Episode ${epNum}`);
 
-                // Intent URL for Just Player (com.kieling.whitescreen)
+                // Updated Intent for JUST PLAYER (com.kieling.whitescreen)
                 const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingUrl}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=${videoTitle};B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
                 btn.href = intentUrl;
                 btn.className = "ep-link";
                 
-                // Track click to show "Active" episode
+                // Click handler to show which EP is "Active"
                 btn.onclick = function() {
                     document.querySelectorAll('.ep-link').forEach(el => el.classList.remove('active'));
                     this.classList.add('active');
@@ -87,7 +80,7 @@
                 grid.appendChild(btn);
             }
         } else {
-            mainContainer.innerHTML = "<div class='error-msg'>No episodes found.</div>";
+            mainContainer.innerHTML = "<p style='margin-top:50px; opacity:0.5;'>No episodes found in URL.</p>";
         }
     </script>
 </body>
