@@ -50,10 +50,9 @@
         const fullQuery = window.location.search;
 
         if (fullQuery.includes('ids=')) {
-            // Poore string ko decode karein bina kisi cut ke
             const idsContent = decodeURIComponent(fullQuery.split('ids=')[1]);
 
-            // Season Header (Sirf ek baar)
+            // Season Header
             const h = document.createElement('div');
             h.className = 'season-title';
             h.innerText = "SEASON 1";
@@ -63,27 +62,24 @@
             grid.className = 'ep-grid';
             mainContainer.appendChild(grid);
 
-            // UPDATED REGEX:
-            // Yeh (number) ke baad ka sab kuch lega jab tak agla (number) ya S1 na aa jaye
+            // REGEX: (number), ke baad ka sab lega jab tak agla bracket ya S tag na mile
             const epRegex = /\((\d+)\),([\s\S]+?)(?=(?:\s*,\s*\(\d+\)|$|S\d+))/g;
             let match;
 
             while ((match = epRegex.exec(idsContent)) !== null) {
                 const epNum = match[1];
-                let epFullLink = match[2].trim();
+                let rawLink = match[2].trim();
 
-                // Link ke end mein agar split comma reh gaya ho toh hatao
-                if (epFullLink.endsWith(',')) epFullLink = epFullLink.slice(0, -1);
+                // 1. Agar link ke aakhir mein comma reh gaya ho toh delete karein
+                if (rawLink.endsWith(',')) rawLink = rawLink.slice(0, -1);
 
-                // --- DROPBOX STREAMING FIX ---
-                // Agar link mein '?' hai (jo ki rlkey ke liye hai), toh hum '&raw=1' add karenge
-                // Taki Dropbox direct stream serve kare
-                let streamingUrl = epFullLink.includes('?') ? 
-                                   `${epFullLink}&raw=1` : 
-                                   `${epFullLink}?raw=1`;
+                // 2. Dropbox Streaming Fix: 
+                // Link ke parameters ke baad &raw=1 lagana taaki file download ke bajaye play ho
+                let streamingLink = rawLink.includes('?') ? `${rawLink}&raw=1` : `${rawLink}?raw=1`;
 
-                // Intent format for White Screen / MX Player
-                const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingUrl}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
+                // 3. Exact Intent Link Construction
+                // Package: com.kieling.whitescreen (Aap ise com.brouken.player bhi kar sakte hain)
+                const intentUrl = `intent://www.dropbox.com/scl/fi/${streamingLink}#Intent;scheme=https;type=video/*;package=com.kieling.whitescreen;S.title=DFlix%20Streaming;B.force_no_download=true;end`;
 
                 const btn = document.createElement('a');
                 btn.href = intentUrl;
